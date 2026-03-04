@@ -1,14 +1,22 @@
-{
-  "name": "qa-rotation",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^7.3.1"
-  }
-}
+diff --git a/package.json b/package.json
+index 670497fe4dc107ba55bf80c3d0376ad5f13f3664..a4d69ea35e74b0a186a0c6be4d69fe365435a743 100644
+--- a/package.json
++++ b/package.json
+@@ -1,14 +1,17 @@
+ {
+   "name": "qa-rotation",
+   "private": true,
+   "version": "0.0.0",
+   "type": "module",
+   "scripts": {
+     "dev": "vite",
+     "build": "vite build",
+     "preview": "vite preview"
+   },
+   "devDependencies": {
+     "vite": "^7.3.1"
++  },
++  "engines": {
++    "node": ">=20"
+   }
+ }
