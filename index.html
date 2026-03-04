@@ -1,326 +1,211 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/logo.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rotación Semanal QA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-</head>
-
-<body>
-  <!-- Loader -->
-  <div id="loader" class="loader">
-    <div class="loader-spinner"></div>
-    <p>Cargando aplicación...</p>
-  </div>
-
-  <!-- Mobile Menu Button -->
-  <button class="mobile-menu-btn" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i>
-  </button>
-
-  <!-- Mobile Overlay -->
-  <div id="mobileOverlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
-
-  <div class="app">
-    <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar glass-strong">
-      <div class="sidebar-logo">
-        <div class="logo-icon" style="background: transparent; box-shadow: none;">
-          <img src="/logo.png" alt="Logo"
-            style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;" />
-        </div>
-        <div class="logo-text">
-          <h1>Rotación <span class="gradient-text">Semanal QA</span></h1>
-          <p>Gestión de QA</p>
-        </div>
-      </div>
-
-      <nav class="nav-section">
-        <div class="nav-label">Menú</div>
-        <div class="nav-item active" onclick="showPage('calendar', this)">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Rotación Semanal</span>
-        </div>
-        <div class="nav-item" onclick="showPage('patches', this)" id="navPatches">
-          <i class="fas fa-code-branch"></i>
-          <span>Rotación Patches</span>
-        </div>
-        <div class="nav-item" onclick="showPage('claves', this)" id="navClaves">
-          <i class="fas fa-key"></i>
-          <span>Claves de Ambiente</span>
-        </div>
-        <div class="nav-item" id="navTeam" onclick="handleTeamClick()">
-          <i class="fas fa-users"></i>
-          <span>Equipo</span>
-          <i class="fas fa-lock lock-icon" id="teamLock"></i>
-        </div>
-      </nav>
-
-      <div class="admin-badge" id="adminBadge">
-        <i class="fas fa-shield-alt"></i>
-        <span>Admin activo</span>
-        <button onclick="logoutAdmin()" title="Cerrar sesión">
-          <i class="fas fa-sign-out-alt"></i>
-        </button>
-      </div>
-
-      <div class="sidebar-footer">
-        <div class="legend-title">Grupos</div>
-        <div class="legend-item">
-          <div class="legend-dot blue"></div>
-          <span>Grupo 1</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot purple"></div>
-          <span>Grupo 2</span>
-        </div>
-        <div class="version">Rotación Semanal QA v3.0 🔥</div>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main">
-      <!-- Topbar -->
-      <header class="topbar glass">
-        <h2 id="pageTitle">Rotación Semanal</h2>
-        <div class="topbar-actions">
-          <div class="connection-status">
-            <div class="dot online" id="connDot"></div>
-            <span id="connText">Local</span>
-          </div>
-          <button class="btn btn-secondary" id="btnAutoAssign" onclick="requireAdmin(autoAssign)">
-            <i class="fas fa-bolt"></i>
-            <span>Auto-asignar</span>
-          </button>
-          <button class="btn btn-secondary hidden" id="btnAutoAssignPatches" onclick="requireAdmin(autoAssignPatches)">
-            <i class="fas fa-bolt"></i>
-            <span>Auto-asignar</span>
-          </button>
-          <button class="btn btn-primary hidden" id="btnAddPerson" onclick="openPersonModal()">
-            <i class="fas fa-plus"></i>
-            <span>Persona</span>
-          </button>
-        </div>
-      </header>
-
-      <!-- Page Content -->
-      <div class="page-content">
-        <!-- Calendar Page -->
-        <div id="pageCalendar" class="page active">
-          <!-- Controls -->
-          <div class="controls-bar">
-            <div class="nav-controls">
-              <button class="nav-btn" onclick="navPeriod(-1)">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <h3 class="period-label" id="periodLabel">-</h3>
-              <button class="nav-btn" onclick="navPeriod(1)">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
-            <div class="view-toggle">
-              <button class="active" id="btnMonth" onclick="setView('month')">
-                <i class="fas fa-calendar"></i>
-                <span>Mes</span>
-              </button>
-              <button id="btnYear" onclick="setView('year')">
-                <i class="fas fa-users"></i>
-                <span>Año</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Coordinator Banner -->
-          <div id="coordinatorBanner" class="coordinator-banner"></div>
-
-          <!-- Calendar Grid -->
-          <div id="calendarGrid" class="calendar-grid month-view"></div>
-        </div>
-
-        <!-- Patches Page -->
-        <div id="pagePatches" class="page">
-          <!-- Controls -->
-          <div class="controls-bar">
-            <div class="nav-controls">
-              <button class="nav-btn" onclick="navPatchesPeriod(-1)">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <h3 class="period-label" id="patchesPeriodLabel">-</h3>
-              <button class="nav-btn" onclick="navPatchesPeriod(1)">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
-            <div class="view-toggle">
-              <button class="active" id="btnPatchesMonth" onclick="setPatchesView('month')">
-                <i class="fas fa-calendar"></i>
-                <span>Mes</span>
-              </button>
-              <button id="btnPatchesYear" onclick="setPatchesView('year')">
-                <i class="fas fa-users"></i>
-                <span>Año</span>
-              </button>
-            </div>
-          </div>
-          <!-- Patches Coordinator Banner -->
-          <div id="patchesBanner" class="coordinator-banner"></div>
-          <!-- Patches Calendar Grid -->
-          <div id="patchesGrid" class="calendar-grid month-view"></div>
-        </div>
-
-        <!-- Claves Page -->
-        <div id="pageClaves" class="page">
-          <div class="claves-grid" id="clavesGrid"></div>
-
-
-          <!-- DB Credentials Section -->
-          <div class="claves-separator" style="margin-top:32px;">
-            <div class="line"></div>
-            <span><i class="fas fa-database"></i>Credenciales de Base de Datos</span>
-            <div class="line"></div>
-          </div>
-          <div class="db-creds-grid" id="dbCredsGrid"></div>
-        </div>
-
-        <!-- Team Page -->
-        <div id="pageTeam" class="page">
-          <div class="team-layout" id="teamLayout"></div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Modals -->
-  <!-- Patches Assign Modal -->
-  <div id="patchesAssignModal" class="modal-backdrop" onclick="closeModal(event, 'patchesAssignModal')">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Asignar Semana · Patches</h3>
-        <button class="modal-close" onclick="closeModalDirect('patchesAssignModal')">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="info-box">
-        <p id="patchesAssignWeekLabel">-</p>
-      </div>
-      <div class="form-group">
-        <label>Responsable Patches</label>
-        <select class="form-control" id="patchesAssignSelect">
-          <option value="">— Sin asignar —</option>
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-danger" onclick="clearPatchesAssign()">
-          <i class="fas fa-trash"></i>
-          Quitar
-        </button>
-        <button class="btn btn-secondary" onclick="closeModalDirect('patchesAssignModal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="savePatchesAssign()">Guardar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Assign Modal -->
-  <div id="assignModal" class="modal-backdrop" onclick="closeModal(event, 'assignModal')">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Asignar Semana</h3>
-        <button class="modal-close" onclick="closeModalDirect('assignModal')">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="info-box">
-        <p id="assignWeekLabel">-</p>
-        <span class="badge" id="assignGroupBadge">Grupo 1</span>
-      </div>
-      <div class="form-group">
-        <label>Responsable</label>
-        <select class="form-control" id="assignSelect">
-          <option value="">— Sin asignar —</option>
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-danger" onclick="clearAssign()">
-          <i class="fas fa-trash"></i>
-          Quitar
-        </button>
-        <button class="btn btn-secondary" onclick="closeModalDirect('assignModal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveAssign()">Guardar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Person Modal -->
-  <div id="personModal" class="modal-backdrop" onclick="closeModal(event, 'personModal')">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3 id="personModalTitle">Nueva Persona</h3>
-        <button class="modal-close" onclick="closeModalDirect('personModal')">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="form-group">
-        <label>Nombre completo</label>
-        <input type="text" class="form-control" id="personName" placeholder="Ej: María García">
-      </div>
-      <div class="form-group">
-        <label>Grupo</label>
-        <div class="group-selector">
-          <button class="group-option selected group-1" id="optGroup1" onclick="selectGroup(1)">
-            <h4>Grupo 1</h4>
-            <p>Semanas 1, 3, 5...</p>
-          </button>
-          <button class="group-option group-2" id="optGroup2" onclick="selectGroup(2)">
-            <h4>Grupo 2</h4>
-            <p>Semanas 2, 4, 6...</p>
-          </button>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeModalDirect('personModal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="savePerson()">Guardar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PIN Modal -->
-  <div id="pinModal" class="modal-backdrop" onclick="closeModal(event, 'pinModal')">
-    <div class="modal pin-modal" onclick="event.stopPropagation()">
-      <div class="pin-icon">
-        <i class="fas fa-shield-alt"></i>
-      </div>
-      <h3 class="pin-title">Acceso Administrador</h3>
-      <p class="pin-subtitle" id="pinSubtitle">Ingresa el PIN de 4 dígitos</p>
-      <div class="pin-dots" id="pinDots">
-        <div class="pin-dot"></div>
-        <div class="pin-dot"></div>
-        <div class="pin-dot"></div>
-        <div class="pin-dot"></div>
-      </div>
-      <div class="pin-pad">
-        <button class="pin-key" onclick="pinKey('1')">1</button>
-        <button class="pin-key" onclick="pinKey('2')">2</button>
-        <button class="pin-key" onclick="pinKey('3')">3</button>
-        <button class="pin-key" onclick="pinKey('4')">4</button>
-        <button class="pin-key" onclick="pinKey('5')">5</button>
-        <button class="pin-key" onclick="pinKey('6')">6</button>
-        <button class="pin-key" onclick="pinKey('7')">7</button>
-        <button class="pin-key" onclick="pinKey('8')">8</button>
-        <button class="pin-key" onclick="pinKey('9')">9</button>
-        <button class="pin-key delete" onclick="pinDelete()">⌫</button>
-        <button class="pin-key" onclick="pinKey('0')">0</button>
-      </div>
-      <p class="pin-cancel" onclick="closeModalDirect('pinModal')">Cancelar</p>
-    </div>
-  </div>
-
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
-
-  <script type="module" src="/main.js"></script>
-</body>
-
-</html>
+diff --git a/index.html b/index.html
+index 6f3d74d9c85da15eeec0cf6cc9aa33a41a4e2cd9..117dacf1d5bd6bf5c0059448171b12dc40342489 100644
+--- a/index.html
++++ b/index.html
+@@ -1,119 +1,166 @@
+ <!DOCTYPE html>
+ <html lang="es">
+ 
+ <head>
+   <meta charset="UTF-8" />
+   <link rel="icon" type="image/png" href="/logo.png" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-  <title>Rotación Semanal QA</title>
++  <title>QATOOLS</title>
+   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+ </head>
+ 
+ <body>
++  <div id="authGate" class="auth-gate">
++    <div class="auth-card glass-strong">
++      <div class="auth-brand">
++        <div class="logo-icon" style="background: transparent; box-shadow: none;">
++          <img src="/logo.png" alt="Logo"
++            style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;" />
++        </div>
++        <div>
++          <h1>QATOOLS</h1>
++          <p>Accede para gestionar rotaciones</p>
++        </div>
++      </div>
++
++      <h2 id="authTitle">Iniciar sesión</h2>
++      <p class="auth-subtitle" id="authSubtitle">Usa tu cuenta para entrar al site.</p>
++
++      <form class="auth-form" onsubmit="event.preventDefault(); submitAuthForm();">
++        <div class="form-group">
++          <label for="authEmail">Correo</label>
++          <input type="email" class="form-control" id="authEmail" placeholder="tu@correo.com" required>
++        </div>
++        <div class="form-group">
++          <label for="authPassword">Contraseña</label>
++          <input type="password" class="form-control" id="authPassword" placeholder="••••••••" required>
++        </div>
++        <div class="form-group hidden" id="authNameGroup">
++          <label for="authName">Nombre</label>
++          <input type="text" class="form-control" id="authName" placeholder="Tu nombre">
++        </div>
++        <button class="btn btn-primary auth-submit" type="submit" id="authSubmitBtn">
++          <i class="fas fa-right-to-bracket"></i>
++          Entrar
++        </button>
++      </form>
++
++      <button class="auth-switch" onclick="toggleAuthMode()" id="authSwitchBtn">¿No tienes cuenta? Regístrate</button>
++    </div>
++  </div>
++
+   <!-- Loader -->
+   <div id="loader" class="loader">
+     <div class="loader-spinner"></div>
+     <p>Cargando aplicación...</p>
+   </div>
+ 
+   <!-- Mobile Menu Button -->
+   <button class="mobile-menu-btn" onclick="toggleSidebar()">
+     <i class="fas fa-bars"></i>
+   </button>
+ 
+   <!-- Mobile Overlay -->
+   <div id="mobileOverlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
+ 
+-  <div class="app">
++  <div class="app app-hidden" id="mainApp">
+     <!-- Sidebar -->
+     <aside id="sidebar" class="sidebar glass-strong">
+       <div class="sidebar-logo">
+         <div class="logo-icon" style="background: transparent; box-shadow: none;">
+           <img src="/logo.png" alt="Logo"
+             style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;" />
+         </div>
+         <div class="logo-text">
+-          <h1>Rotación <span class="gradient-text">Semanal QA</span></h1>
++          <h1><span class="gradient-text">QATOOLS</span></h1>
+           <p>Gestión de QA</p>
+         </div>
+       </div>
+ 
+       <nav class="nav-section">
+         <div class="nav-label">Menú</div>
+         <div class="nav-item active" onclick="showPage('calendar', this)">
+           <i class="fas fa-calendar-alt"></i>
+           <span>Rotación Semanal</span>
+         </div>
+         <div class="nav-item" onclick="showPage('patches', this)" id="navPatches">
+           <i class="fas fa-code-branch"></i>
+           <span>Rotación Patches</span>
+         </div>
+         <div class="nav-item" onclick="showPage('claves', this)" id="navClaves">
+           <i class="fas fa-key"></i>
+-          <span>Claves de Ambiente</span>
++          <span>Claves Ambientes</span>
+         </div>
+         <div class="nav-item" id="navTeam" onclick="handleTeamClick()">
+           <i class="fas fa-users"></i>
+           <span>Equipo</span>
+           <i class="fas fa-lock lock-icon" id="teamLock"></i>
+         </div>
+       </nav>
+ 
+       <div class="admin-badge" id="adminBadge">
+         <i class="fas fa-shield-alt"></i>
+         <span>Admin activo</span>
+         <button onclick="logoutAdmin()" title="Cerrar sesión">
+           <i class="fas fa-sign-out-alt"></i>
+         </button>
+       </div>
+ 
+       <div class="sidebar-footer">
+         <div class="legend-title">Grupos</div>
+         <div class="legend-item">
+           <div class="legend-dot blue"></div>
+           <span>Grupo 1</span>
+         </div>
+         <div class="legend-item">
+           <div class="legend-dot purple"></div>
+           <span>Grupo 2</span>
+         </div>
+-        <div class="version">Rotación Semanal QA v3.0 🔥</div>
++        <div class="version">QATOOLS v3.0 🔥</div>
+       </div>
+     </aside>
+ 
+     <!-- Main Content -->
+     <main class="main">
+       <!-- Topbar -->
+       <header class="topbar glass">
+         <h2 id="pageTitle">Rotación Semanal</h2>
+         <div class="topbar-actions">
+           <div class="connection-status">
+             <div class="dot online" id="connDot"></div>
+             <span id="connText">Local</span>
+           </div>
++          <div class="auth-user-pill" id="authUserPill">
++            <i class="fas fa-user-circle"></i>
++            <span id="authUserLabel">Usuario</span>
++          </div>
++          <button class="btn btn-secondary" onclick="logoutUser()">
++            <i class="fas fa-right-from-bracket"></i>
++            <span>Salir</span>
++          </button>
+           <button class="btn btn-secondary" id="btnAutoAssign" onclick="requireAdmin(autoAssign)">
+             <i class="fas fa-bolt"></i>
+             <span>Auto-asignar</span>
+           </button>
+           <button class="btn btn-secondary hidden" id="btnAutoAssignPatches" onclick="requireAdmin(autoAssignPatches)">
+             <i class="fas fa-bolt"></i>
+             <span>Auto-asignar</span>
+           </button>
+           <button class="btn btn-primary hidden" id="btnAddPerson" onclick="openPersonModal()">
+             <i class="fas fa-plus"></i>
+             <span>Persona</span>
+           </button>
+         </div>
+       </header>
+ 
+       <!-- Page Content -->
+       <div class="page-content">
+         <!-- Calendar Page -->
+         <div id="pageCalendar" class="page active">
+           <!-- Controls -->
+           <div class="controls-bar">
+             <div class="nav-controls">
+               <button class="nav-btn" onclick="navPeriod(-1)">
+                 <i class="fas fa-chevron-left"></i>
+               </button>
+@@ -298,29 +345,32 @@
+         <div class="pin-dot"></div>
+         <div class="pin-dot"></div>
+         <div class="pin-dot"></div>
+         <div class="pin-dot"></div>
+       </div>
+       <div class="pin-pad">
+         <button class="pin-key" onclick="pinKey('1')">1</button>
+         <button class="pin-key" onclick="pinKey('2')">2</button>
+         <button class="pin-key" onclick="pinKey('3')">3</button>
+         <button class="pin-key" onclick="pinKey('4')">4</button>
+         <button class="pin-key" onclick="pinKey('5')">5</button>
+         <button class="pin-key" onclick="pinKey('6')">6</button>
+         <button class="pin-key" onclick="pinKey('7')">7</button>
+         <button class="pin-key" onclick="pinKey('8')">8</button>
+         <button class="pin-key" onclick="pinKey('9')">9</button>
+         <button class="pin-key delete" onclick="pinDelete()">⌫</button>
+         <button class="pin-key" onclick="pinKey('0')">0</button>
+       </div>
+       <p class="pin-cancel" onclick="closeModalDirect('pinModal')">Cancelar</p>
+     </div>
+   </div>
+ 
+   <!-- Toast Container -->
+   <div class="toast-container" id="toastContainer"></div>
+ 
++  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
++  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
++  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+   <script type="module" src="/main.js"></script>
+ </body>
+ 
+-</html>
+\ No newline at end of file
++</html>
